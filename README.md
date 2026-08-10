@@ -10,6 +10,28 @@ no cost.
 The distributed application is intentionally empty: it contains no bookmarks,
 database, credentials, or configuration from any specific installation.
 
+## Screenshots
+
+### Your bookmark library
+
+![C3PBookmarks bookmark library](docs/screenshots/library-overview.jpg)
+
+### Save a bookmark
+
+![Save a bookmark](docs/screenshots/save-bookmark.jpg)
+
+### Import browser bookmarks
+
+![Import browser bookmarks](docs/screenshots/import-bookmarks.jpg)
+
+### Organize folders
+
+![Edit a folder](docs/screenshots/edit-folder.jpg)
+
+The application also starts cleanly with an empty library:
+
+![Empty C3PBookmarks library](docs/screenshots/library-empty.jpg)
+
 ## Features
 
 - Responsive interface with light and dark modes.
