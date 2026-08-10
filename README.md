@@ -137,6 +137,8 @@ This project is released under the MIT license. See [LICENSE](LICENSE).
 C3PBookmarks is free. If you find it useful, you can support its maintenance
 through [Buy Me a Coffee](https://buymeacoffee.com/joafer).
 
+[![Support on Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-support-orange?logo=buymeacoffee)](https://buymeacoffee.com/joafer)
+
 ## Contributing
 
 Suggestions, fixes, and improvements are welcome. Before submitting changes,
