@@ -962,7 +962,7 @@ def home(q: str = "", folder: str = "", message: str = "") -> HTMLResponse:
   </aside>
   <section class="content-column">
     <div class="results-panel">
-      <div class="list-heading"><span id="result-count">{esc(count_label("result", len(rows)))}</span><a href="/import">{esc(t("import_bookmarks_html"))}</a></div>
+      <div class="list-heading"><span id="result-count">{esc(count_label("result", len(rows)))}</span></div>
       <div class="bulk-toolbar" data-bulk-toolbar hidden>
         <label class="bulk-select-all"><input type="checkbox" data-select-all> {esc(t("select_all"))}</label>
         <span class="bulk-selection-count" data-selection-count>0</span>
