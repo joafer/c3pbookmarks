@@ -134,8 +134,6 @@ folder structure is preserved.
 - Never publish `data/` if it contains personal bookmarks.
 - The application does not provide authentication. If exposed to the Internet,
   add authentication, HTTPS, and access control with a reverse proxy.
-- The `data/` directory is excluded from Git and the Docker build context to
-  reduce the risk of publishing or packaging personal data.
 
 Example backup and restore:
 
