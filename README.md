@@ -1,65 +1,78 @@
 # C3PBookmarks
 
-Biblioteca personal de marcadores web-first, sencilla y autoalojable. Permite guardar enlaces, organizarlos en carpetas y subcarpetas, buscarlos, importar marcadores HTML del navegador y usar un bookmarklet para guardar la página actual.
+A simple, web-first, self-hosted bookmark manager. Save links, organize them
+into folders and subfolders, search your library, import browser bookmarks,
+and use a bookmarklet to save the current page.
 
-Proyecto gratuito y de código abierto. Puedes usarlo, modificarlo y autoalojarlo sin coste.
+C3PBookmarks is free and open source. You can use, modify, and self-host it at
+no cost.
 
-La aplicación se distribuye vacía: no incluye marcadores, base de datos, credenciales ni configuración de ninguna instalación concreta.
+The distributed application is intentionally empty: it contains no bookmarks,
+database, credentials, or configuration from any specific installation.
 
-## Características
+## Features
 
-- Interfaz responsive con modo claro/oscuro.
-- Alta y edición manual de marcadores, etiquetas, notas e iconos.
-- Importación de HTML exportado por Chrome, Firefox y otros navegadores.
-- Búsqueda global mediante SQLite FTS5.
-- Carpetas y subcarpetas con renombrado, iconos, carpeta predeterminada y orden manual.
-- Arrastrar y soltar para mover y ordenar carpetas y marcadores.
-- Selector de idioma en español, inglés, italiano, portugués y alemán.
-- Bookmarklet para guardar enlaces desde cualquier página sin instalar una extensión.
-- Persistencia local en SQLite y despliegue sencillo con Docker Compose.
+- Responsive interface with light and dark modes.
+- Manual bookmark creation and editing, including tags, notes, and icons.
+- Import from HTML exported by Chrome, Firefox, and other browsers.
+- Global search powered by SQLite FTS5.
+- Folders and subfolders with renaming, icons, a default folder, and manual ordering.
+- Drag and drop to move and reorder folders and bookmarks.
+- Language selector with English, Spanish, Italian, Portuguese, and German.
+- Bookmarklet for saving links from any page without installing an extension.
+- Local SQLite persistence and simple Docker Compose deployment.
 
-La importación conserva caracteres especiales y Unicode en nombres, títulos, etiquetas y notas, incluidos `&`, `%`, `?`, `#`, comillas, acentos y emojis. Las rutas generadas para carpetas se codifican correctamente para que esos nombres sigan siendo navegables.
+Imports preserve special characters and Unicode in folder names, titles, tags,
+and notes, including `&`, `%`, `?`, `#`, quotes, accented characters, and
+emojis. Generated folder URLs are encoded correctly so those folders remain
+navigable.
 
-En una ruta de carpetas, la secuencia ` / ` (espacio, barra, espacio) se interpreta como separador de niveles. Es la convención que permite representar subcarpetas exportadas por el navegador.
+Within an imported folder path, ` / ` (space, slash, space) is interpreted as
+the subfolder separator. This convention represents nested folders exported by
+browsers.
 
-Al borrar una carpeta desde el menú, se borra también su rama de subcarpetas, pero los marcadores se conservan y pasan a `Sin clasificar`. Esa carpeta está protegida y no se puede borrar.
+Deleting a folder from the menu also deletes its subfolder branch, but keeps
+all bookmarks by moving them to `Unsorted`. The `Unsorted` folder is protected
+and cannot be deleted.
 
-## Uso rápido con Docker Compose
+## Quick start with Docker Compose
 
-Requisitos: Docker Engine y Docker Compose v2.
+Requirements: Docker Engine and Docker Compose v2.
 
 ```bash
 docker compose up -d --build
 ```
 
-Abre <http://localhost:8000>. La aplicación creará automáticamente una base SQLite vacía en `data/` al arrancar.
+Open <http://localhost:8000>. The application automatically creates an empty
+SQLite database in `data/` on first start.
 
-Para instalar en otro puerto, copia la configuración de ejemplo y cambia el puerto publicado:
+To use a different host port, copy the example configuration and edit it:
 
 ```bash
 cp .env.example .env
-# Edita C3PBOOKMARKS_HOST_PORT, por ejemplo 8080
+# Edit C3PBOOKMARKS_HOST_PORT, for example 8080
 docker compose up -d --build
 ```
 
-El fichero `compose.yaml` usa el puerto 8000 dentro del contenedor y permite cambiar solo el puerto del equipo anfitrión.
+The container always listens on port 8000. Only the host port needs to change.
 
-Para detenerla:
+To stop the application:
 
 ```bash
 docker compose down
 ```
 
-Para actualizar una instalación existente después de descargar una nueva versión:
+To update an existing installation:
 
 ```bash
 git pull
 docker compose up -d --build
 ```
 
-Los datos se guardan en `data/`. Esa carpeta está excluida del repositorio mediante `.gitignore`, por lo que los marcadores personales no deben publicarse por accidente.
+Your data is stored in `data/`. That directory is excluded by `.gitignore`,
+so personal bookmarks should not be published accidentally.
 
-## Ejecutar sin Docker
+## Run without Docker
 
 ```bash
 python -m venv .venv
@@ -68,35 +81,42 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
-Después, abre <http://localhost:8000>.
+Then open <http://localhost:8000>.
 
 ## Bookmarklet
 
-Abre `/bookmarklet` desde la instalación y arrastra el botón a la barra de marcadores del navegador. Si la aplicación está detrás de un dominio público o un proxy, define antes `C3PBOOKMARKS_PUBLIC_URL` en el entorno:
+Open `/bookmarklet` from your installation and drag the button to your
+browser's bookmarks bar. If the application is behind a public domain or
+reverse proxy, set `C3PBOOKMARKS_PUBLIC_URL` first:
 
 ```bash
-C3PBOOKMARKS_PUBLIC_URL=https://marcadores.example.com docker compose up -d --build
+C3PBOOKMARKS_PUBLIC_URL=https://bookmarks.example.com docker compose up -d --build
 ```
 
-Si no se define, el bookmarklet usa automáticamente la URL desde la que se haya abierto la página.
+If it is not set, the bookmarklet automatically uses the URL from which the
+page was opened.
 
-Para usar otro puerto en el mismo equipo, crea un `.env` a partir de `.env.example` y cambia `C3PBOOKMARKS_HOST_PORT`.
+## Importing bookmarks and data
 
-## Importación y datos
+Export bookmarks from Chrome, Firefox, or another browser as an HTML file and
+use **Import HTML**. Duplicate or invalid links are skipped and the original
+folder structure is preserved.
 
-Exporta los marcadores desde Chrome, Firefox u otro navegador en formato HTML y usa `Importar HTML`. Se omiten enlaces duplicados o inválidos y se conservan las carpetas originales.
+Names, titles, tags, notes, and URLs support Unicode, accents, emojis, and
+characters such as `&`, `%`, `?`, `#`, quotes, and `+`. The only special
+convention is ` / ` inside a folder path, which represents a subfolder.
 
-Los nombres, títulos, etiquetas, notas y URLs admiten Unicode, acentos, emojis y caracteres como `&`, `%`, `?`, `#`, comillas y `+`. La única convención especial es ` / ` dentro de una ruta, que representa una subcarpeta.
+## Backups and security
 
-## Copias de seguridad y seguridad
+- The database is stored at `data/c3pbookmarks.sqlite3`.
+- Stop the application before copying the database for a backup.
+- Never publish `data/` if it contains personal bookmarks.
+- The application does not provide authentication. If exposed to the Internet,
+  add authentication, HTTPS, and access control with a reverse proxy.
+- The `data/` directory is excluded from Git and the Docker build context to
+  reduce the risk of publishing or packaging personal data.
 
-- La base de datos se crea en `data/c3pbookmarks.sqlite3`.
-- Para hacer una copia, detén la aplicación y copia ese archivo.
-- No publiques nunca la carpeta `data/` si contiene tus marcadores.
-- La aplicación no incorpora autenticación. Para exponerla en Internet, añade autenticación, HTTPS y control de acceso en un proxy inverso.
-- El volumen `data/` está excluido de Git y del contexto de construcción de Docker para reducir el riesgo de publicar o empaquetar datos personales.
-
-Ejemplo de copia y restauración:
+Example backup and restore:
 
 ```bash
 docker compose down
@@ -105,20 +125,23 @@ cp data/c3pbookmarks.sqlite3 backups/c3pbookmarks-$(date +%F).sqlite3
 docker compose up -d
 ```
 
-Para restaurar, detén la aplicación, sustituye `data/c3pbookmarks.sqlite3` por una copia válida y vuelve a arrancarla.
+To restore, stop the application, replace `data/c3pbookmarks.sqlite3` with a
+valid backup, and start it again.
 
-## Licencia
+## License
 
-Este proyecto se publica bajo la licencia MIT. Consulta [LICENSE](LICENSE).
+This project is released under the MIT license. See [LICENSE](LICENSE).
 
-## Apoyar el proyecto
+## Support the project
 
-C3PBookmarks es gratuito. Si te resulta útil, puedes apoyar su mantenimiento mediante [Buy Me a Coffee](https://buymeacoffee.com/joafer).
+C3PBookmarks is free. If you find it useful, you can support its maintenance
+through [Buy Me a Coffee](https://buymeacoffee.com/joafer).
 
-## Contribuir
+## Contributing
 
-Las mejoras, correcciones y propuestas son bienvenidas. Antes de enviar cambios, comprueba que:
+Suggestions, fixes, and improvements are welcome. Before submitting changes,
+make sure that:
 
-- no contienen datos personales, marcadores reales ni secretos;
-- la aplicación arranca desde una base de datos vacía;
-- `data/` y los ficheros locales quedan fuera del control de versiones.
+- no personal data, real bookmarks, or secrets are included;
+- the application starts from an empty database;
+- `data/` and local configuration files remain outside version control.
