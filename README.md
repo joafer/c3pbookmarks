@@ -1,3 +1,10 @@
+## Support the project
+
+[![Support on Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-support-orange?logo=buymeacoffee)](https://buymeacoffee.com/joafer)
+
+C3PBookmarks is free. If you find it useful, you can support its maintenance
+through [Buy Me a Coffee](https://buymeacoffee.com/joafer).
+
 # C3PBookmarks
 
 A simple, web-first, self-hosted bookmark manager. Save links, organize them
@@ -128,8 +135,6 @@ folder structure is preserved.
 - Never publish `data/` if it contains personal bookmarks.
 - The application does not provide authentication. If exposed to the Internet,
   add authentication, HTTPS, and access control with a reverse proxy.
-- The `data/` directory is excluded from Git and the Docker build context to
-  reduce the risk of publishing or packaging personal data.
 
 ### Web backup and restore
 
@@ -157,18 +162,7 @@ valid backup, and start it again.
 
 This project is released under the MIT license. See [LICENSE](LICENSE).
 
-## Support the project
-
-[![Support on Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-support-orange?logo=buymeacoffee)](https://buymeacoffee.com/joafer)
-
-C3PBookmarks is free. If you find it useful, you can support its maintenance
-through [Buy Me a Coffee](https://buymeacoffee.com/joafer).
 
 ## Contributing
 
-Suggestions, fixes, and improvements are welcome. Before submitting changes,
-make sure that:
-
-- no personal data, real bookmarks, or secrets are included;
-- the application starts from an empty database;
-- `data/` and local configuration files remain outside version control.
+Suggestions, fixes, and improvements are welcome.
