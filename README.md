@@ -44,19 +44,6 @@ The application also starts cleanly with an empty library:
 - Bookmarklet for saving links from any page without installing an extension.
 - Local SQLite persistence and simple Docker Compose deployment.
 
-Imports preserve special characters and Unicode in folder names, titles, tags,
-and notes, including `&`, `%`, `?`, `#`, quotes, accented characters, and
-emojis. Generated folder URLs are encoded correctly so those folders remain
-navigable.
-
-Within an imported folder path, ` / ` (space, slash, space) is interpreted as
-the subfolder separator. This convention represents nested folders exported by
-browsers.
-
-Deleting a folder from the menu also deletes its subfolder branch, but keeps
-all bookmarks by moving them to `Unsorted`. The `Unsorted` folder is protected
-and cannot be deleted.
-
 ## Quick start with Docker Compose
 
 Requirements: Docker Engine and Docker Compose v2.
@@ -132,10 +119,6 @@ page was opened.
 Export bookmarks from Chrome, Firefox, or another browser as an HTML file and
 use **Import HTML**. Duplicate or invalid links are skipped and the original
 folder structure is preserved.
-
-Names, titles, tags, notes, and URLs support Unicode, accents, emojis, and
-characters such as `&`, `%`, `?`, `#`, quotes, and `+`. The only special
-convention is ` / ` inside a folder path, which represents a subfolder.
 
 ## Backups and security
 
