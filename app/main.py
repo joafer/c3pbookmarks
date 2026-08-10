@@ -28,13 +28,14 @@ BACKUP_LOCK = threading.RLock()
 STATIC_DIR = Path(__file__).parent.parent / "static"
 PUBLIC_BASE_URL = os.environ.get("C3PBOOKMARKS_PUBLIC_URL", "").rstrip("/")
 LANGUAGE_COOKIE = "c3pbookmarks_lang"
-SUPPORTED_LANGUAGES = ("es", "en", "it", "pt", "de")
+SUPPORTED_LANGUAGES = ("es", "en", "it", "pt", "de", "fr")
 LANGUAGE_NAMES = {
     "es": "Español",
     "en": "English",
     "it": "Italiano",
     "pt": "Português",
     "de": "Deutsch",
+    "fr": "Français",
 }
 LANGUAGE_FLAGS = {
     "es": '<svg class="language-flag" viewBox="0 0 24 16" aria-hidden="true"><path fill="#c60b1e" d="M0 0h24v4H0zM0 12h24v4H0z"/><path fill="#ffc400" d="M0 4h24v8H0z"/></svg>',
@@ -42,6 +43,7 @@ LANGUAGE_FLAGS = {
     "it": '<svg class="language-flag" viewBox="0 0 24 16" aria-hidden="true"><path fill="#009246" d="M0 0h8v16H0z"/><path fill="#f1f2f1" d="M8 0h8v16H8z"/><path fill="#ce2b37" d="M16 0h8v16h-8z"/></svg>',
     "pt": '<svg class="language-flag" viewBox="0 0 24 16" aria-hidden="true"><path fill="#046a38" d="M0 0h10v16H0z"/><path fill="#da291c" d="M10 0h14v16H10z"/><circle cx="10" cy="8" r="3.1" fill="#ffcd00"/><circle cx="10" cy="8" r="2" fill="#fff"/></svg>',
     "de": '<svg class="language-flag" viewBox="0 0 24 16" aria-hidden="true"><path fill="#000" d="M0 0h24v5.33H0z"/><path fill="#d00" d="M0 5.33h24v5.34H0z"/><path fill="#ffce00" d="M0 10.67h24V16H0z"/></svg>',
+    "fr": '<svg class="language-flag" viewBox="0 0 24 16" aria-hidden="true"><path fill="#0055a4" d="M0 0h8v16H0z"/><path fill="#fff" d="M8 0h8v16H8z"/><path fill="#ef4135" d="M16 0h8v16h-8z"/></svg>',
 }
 
 app = FastAPI(title="C3PBookmarks")
@@ -174,6 +176,10 @@ TRANSLATIONS = {
     },
 }
 
+TRANSLATIONS["fr"] = {
+    "language_select": "Langue", "save_link": "Enregistrer le lien", "import_html": "Importer HTML", "add": "Ajouter", "theme_change": "Changer de thème", "home": "Accueil", "your_library": "Votre bibliothèque personnelle", "bookmarks_one": "{count} favori centralisé", "bookmarks_many": "{count} favoris centralisés", "add_bookmark": "Ajouter un favori", "search_placeholder": "Rechercher par titre, URL, dossier ou étiquette…", "search_bookmarks": "Rechercher des favoris", "search": "Rechercher", "folders": "Dossiers", "collapse_folders": "Réduire les dossiers", "create_folder": "Créer un dossier", "drop_root": "Déposez ici pour déplacer à la racine", "all_bookmarks": "Tous les favoris", "uncategorized": "Non classés", "no_folders": "Aucun dossier pour le moment.", "result_one": "{count} résultat", "result_many": "{count} résultats", "import_bookmarks_html": "Importer des favoris HTML", "empty_title": "Aucun favori pour le moment.", "empty_help": "Importez le HTML du navigateur ou ajoutez votre premier favori.", "drag_bookmark": "Faites glisser ce favori vers un dossier ou un autre favori", "drag_bookmark_folder": "Faites glisser ce favori vers un dossier", "edit_bookmark": "Modifier le favori", "delete_bookmark": "Supprimer le favori", "delete_folder": "Supprimer le dossier", "empty_folder_only": "Seuls les dossiers vides peuvent être supprimés", "rename_folder": "Renommer le dossier", "create_subfolder": "Créer un sous-dossier", "drop_folder": "Déposez des favoris ou des dossiers ici", "organization": "Organisation", "new_folder": "Nouveau dossier", "new_folder_help": "Créez un dossier ou un chemin complet, par exemple :", "folder_path": "Chemin du dossier", "cancel": "Annuler", "create_folder_button": "Créer le dossier", "edit_folder": "Modifier le dossier", "location": "Emplacement", "folder_update_help": "Ses favoris et ses sous-dossiers seront mis à jour automatiquement.", "new_name": "Nouveau nom", "icon_emoji": "Icône ou emoji", "emoji_help": "Choisissez-en un ou saisissez un autre emoji.", "choose_emoji": "Choisir un emoji", "remove_icon": "Supprimer l’icône", "default_folder": "Ouvrir ce dossier par défaut", "save_changes": "Enregistrer les modifications", "modify_link": "Modifier le lien", "url": "URL", "title": "Titre", "folder": "Dossier", "tags": "Étiquettes", "notes": "Notes", "site_title": "Titre du site", "tags_placeholder": "facultatives, séparées par des virgules", "optional": "Facultatif", "save": "Enregistrer", "quick_access": "Accès rapide", "save_from_browser": "Enregistrer depuis le navigateur", "bookmarklet_help": "Installez ce bouton une fois. Ensuite, appuyez dessus sur n’importe quelle page pour ouvrir C3PBookmarks avec l’URL et le titre déjà remplis.", "bookmarklet_button": "Enregistrer la page dans C3PBookmarks", "bookmarklet_step1": "Faites glisser le bouton vers la barre de favoris du navigateur.", "bookmarklet_step2": "Visitez une page et appuyez sur le favori installé.", "bookmarklet_step3": "Choisissez un dossier, ajoutez des étiquettes ou des notes, puis enregistrez.", "bookmarklet_manual": "Si vous ne pouvez pas le faire glisser, créez un favori portant ce nom et copiez le lien du bouton comme adresse.", "migration": "Migration simple", "import_html_title": "Importer des favoris HTML", "import_html_help": "Exportez vos favoris depuis le navigateur et téléversez le fichier HTML ici. Les doublons sont ignorés et les dossiers d’origine sont conservés.", "file_html": "Fichier HTML", "source_optional": "Source (facultative)", "source_placeholder": "Chrome portable, Firefox pour PC, etc.", "import": "Importer", "bookmark_saved": "Favori enregistré.", "duplicate_invalid": "Ce lien existe déjà ou n’est pas valide.", "folder_created": "Dossier créé.", "valid_folder": "Saisissez un nom de dossier valide.", "cannot_edit_folder": "Ce dossier ne peut pas être modifié.", "valid_folder_no_slashes": "Saisissez un nom de dossier valide, sans barre oblique.", "folder_renamed": "Dossier renommé.", "folder_not_editable": "Le dossier n’existe pas ou ne peut pas être modifié.", "folder_name_exists": "Un dossier portant ce nom existe déjà ici.", "folder_moved": "Le dossier n’existe pas ou ne peut pas être déplacé.", "destination_not_found": "Le dossier de destination n’existe pas.", "folder_cycle": "Vous ne pouvez pas déplacer un dossier dans lui-même ou dans l’un de ses descendants.", "destination_name_exists": "Un dossier portant ce nom existe déjà à destination.", "bookmark_not_found": "Favori introuvable.", "same_folder_reorder": "Les favoris ne peuvent être réordonnés que dans le même dossier.", "folder_not_found": "Dossier introuvable.", "folder_level_reorder": "Les dossiers ne peuvent être réordonnés qu’au même niveau.", "uncategorized_last": "Les éléments non classés restent toujours à la fin.", "folder_deleted": "Dossier supprimé ; ses favoris ont été déplacés vers Non classés.", "uncategorized_protected": "Le dossier Non classés ne peut pas être supprimé.", "folder_does_not_exist": "Le dossier n’existe pas.", "folder_has_children": "Un dossier contenant des sous-dossiers ne peut pas être supprimé.", "folder_has_bookmarks": "Un dossier contenant des favoris ne peut pas être supprimé.", "html_read_error": "Le fichier HTML n’a pas pu être lu.", "import_finished": "Importation terminée : {added} ajoutés, {skipped} doublons ou éléments invalides ignorés.", "root_folders": "Dossiers racine",
+}
+
 TRANSLATIONS["en"]["folder_deleted"] = "Folder deleted; its bookmarks were moved to Uncategorized."
 TRANSLATIONS["it"]["folder_deleted"] = "Cartella eliminata; i suoi segnalibri sono stati spostati in Senza categoria."
 TRANSLATIONS["pt"]["folder_deleted"] = "Pasta apagada; os seus marcadores foram movidos para Sem categoria."
@@ -260,6 +266,22 @@ BACKUP_TRANSLATIONS = {
         "backup_restore_error": "Das Backup konnte nicht wiederhergestellt werden.",
         "backup_trusted_network": "Diese Seite nur in einem vertrauenswürdigen Netzwerk verwenden. Eine Authentifizierung ist nicht integriert.",
     },
+    "fr": {
+        "backup": "Sauvegardes",
+        "backup_title": "Sauvegardes",
+        "backup_help": "Téléchargez une copie ZIP de votre bibliothèque ou restaurez une sauvegarde précédente.",
+        "backup_download": "Télécharger la sauvegarde ZIP",
+        "backup_restore_title": "Restaurer une sauvegarde",
+        "backup_restore_help": "Téléversez une sauvegarde ZIP de C3PBookmarks. Une copie de sécurité est créée automatiquement avant la restauration.",
+        "backup_file": "Fichier de sauvegarde",
+        "backup_restore": "Restaurer la sauvegarde",
+        "backup_confirm": "Restaurer cette sauvegarde ? Les données actuelles seront remplacées. Une copie de sécurité sera d’abord créée.",
+        "backup_invalid": "La sauvegarde n’est pas valide ou n’appartient pas à C3PBookmarks.",
+        "backup_too_large": "La sauvegarde dépasse la taille maximale autorisée.",
+        "backup_restored": "Sauvegarde restaurée avec succès.",
+        "backup_restore_error": "La sauvegarde n’a pas pu être restaurée.",
+        "backup_trusted_network": "Utilisez cette page uniquement sur un réseau de confiance. L’authentification n’est pas intégrée.",
+    },
 }
 for _language, _values in BACKUP_TRANSLATIONS.items():
     TRANSLATIONS[_language].update(_values)
@@ -319,6 +341,17 @@ BULK_TRANSLATIONS = {
         "confirm_delete_selected": "Die {count} ausgewählten Bookmarks löschen?",
         "bulk_error": "Die ausgewählten Aktionen konnten nicht angewendet werden.",
         "bulk_no_selection": "Mindestens einen Bookmark auswählen.",
+    },
+    "fr": {
+        "select_all": "Tout sélectionner",
+        "select_bookmark": "Sélectionner le favori",
+        "selected_count": "{count} sélectionnés",
+        "move_selected": "Déplacer la sélection",
+        "move_to": "Déplacer vers…",
+        "delete_selected": "Supprimer la sélection",
+        "confirm_delete_selected": "Supprimer les {count} favoris sélectionnés ?",
+        "bulk_error": "Les actions sélectionnées n’ont pas pu être appliquées.",
+        "bulk_no_selection": "Sélectionnez au moins un favori.",
     },
 }
 for _language, _values in BULK_TRANSLATIONS.items():
@@ -771,6 +804,7 @@ EMOJI_LABELS = {
     "it": ("Casa", "Lavoro", "Preferito", "Cartella", "Computer", "Web", "Strumenti", "Sicurezza", "Documentazione", "Finanza", "Video", "Test", "Archivio", "Note", "Importante", "Link", "Acquisti", "Banca", "Musica", "Giochi", "Fotografia", "Mappe", "Progetti", "Personale"),
     "pt": ("Casa", "Trabalho", "Favorito", "Pasta", "Computador", "Web", "Ferramentas", "Segurança", "Documentação", "Finanças", "Vídeos", "Testes", "Arquivo", "Notas", "Importante", "Link", "Compras", "Banca", "Música", "Jogos", "Fotografia", "Mapas", "Projetos", "Pessoal"),
     "de": ("Zuhause", "Arbeit", "Favorit", "Ordner", "Computer", "Web", "Werkzeuge", "Sicherheit", "Dokumentation", "Finanzen", "Videos", "Tests", "Archiv", "Notizen", "Wichtig", "Link", "Einkäufe", "Bank", "Musik", "Spiele", "Fotografie", "Karten", "Projekte", "Persönlich"),
+    "fr": ("Accueil", "Travail", "Favori", "Dossier", "Ordinateur", "Web", "Outils", "Sécurité", "Documentation", "Finances", "Vidéos", "Tests", "Archive", "Notes", "Important", "Lien", "Achats", "Banque", "Musique", "Jeux", "Photographie", "Cartes", "Projets", "Personnel"),
 }
 
 
