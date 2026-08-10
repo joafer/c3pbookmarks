@@ -4,6 +4,8 @@ import html
 import os
 import re
 import sqlite3
+import tempfile
+import threading
 from contextvars import ContextVar
 from datetime import datetime, timezone
 from html.parser import HTMLParser
@@ -11,12 +13,16 @@ from pathlib import Path
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from fastapi import FastAPI, File, Form, Request, UploadFile
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
+from starlette.background import BackgroundTask
 
 
 DATA_DIR = Path(os.environ.get("C3PBOOKMARKS_DATA", "/app/data"))
 DB_PATH = DATA_DIR / "c3pbookmarks.sqlite3"
+BACKUP_DIR = DATA_DIR / "backups"
+MAX_BACKUP_BYTES = 100 * 1024 * 1024
+BACKUP_LOCK = threading.RLock()
 STATIC_DIR = Path(__file__).parent.parent / "static"
 PUBLIC_BASE_URL = os.environ.get("C3PBOOKMARKS_PUBLIC_URL", "").rstrip("/")
 LANGUAGE_COOKIE = "c3pbookmarks_lang"
@@ -171,6 +177,91 @@ TRANSLATIONS["it"]["folder_deleted"] = "Cartella eliminata; i suoi segnalibri so
 TRANSLATIONS["pt"]["folder_deleted"] = "Pasta apagada; os seus marcadores foram movidos para Sem categoria."
 TRANSLATIONS["de"]["folder_deleted"] = "Ordner gelöscht; seine Bookmarks wurden nach Nicht kategorisiert verschoben."
 
+BACKUP_TRANSLATIONS = {
+    "es": {
+        "backup": "Copias",
+        "backup_title": "Copias de seguridad",
+        "backup_help": "Descarga una copia de tu biblioteca o restaura una copia anterior.",
+        "backup_download": "Descargar copia",
+        "backup_restore_title": "Restaurar una copia",
+        "backup_restore_help": "Sube una copia SQLite de C3PBookmarks. Antes de restaurar se crea automáticamente otra copia de seguridad.",
+        "backup_file": "Archivo de copia",
+        "backup_restore": "Restaurar copia",
+        "backup_confirm": "¿Restaurar esta copia? Los datos actuales se reemplazarán. Antes se creará una copia automática.",
+        "backup_invalid": "La copia no es válida o no pertenece a C3PBookmarks.",
+        "backup_too_large": "La copia supera el tamaño máximo permitido.",
+        "backup_restored": "Copia restaurada correctamente.",
+        "backup_restore_error": "No se pudo restaurar la copia.",
+        "backup_trusted_network": "Usa esta página solo en una red de confianza. No hay autenticación integrada.",
+    },
+    "en": {
+        "backup": "Backup",
+        "backup_title": "Backups",
+        "backup_help": "Download a copy of your library or restore an earlier backup.",
+        "backup_download": "Download backup",
+        "backup_restore_title": "Restore a backup",
+        "backup_restore_help": "Upload a C3PBookmarks SQLite backup. A safety backup is created automatically before restoring.",
+        "backup_file": "Backup file",
+        "backup_restore": "Restore backup",
+        "backup_confirm": "Restore this backup? Current data will be replaced. A safety backup will be created first.",
+        "backup_invalid": "The backup is invalid or does not belong to C3PBookmarks.",
+        "backup_too_large": "The backup exceeds the maximum allowed size.",
+        "backup_restored": "Backup restored successfully.",
+        "backup_restore_error": "The backup could not be restored.",
+        "backup_trusted_network": "Use this page only on a trusted network. Authentication is not built in.",
+    },
+    "it": {
+        "backup": "Backup",
+        "backup_title": "Backup",
+        "backup_help": "Scarica una copia della tua libreria o ripristina un backup precedente.",
+        "backup_download": "Scarica backup",
+        "backup_restore_title": "Ripristina un backup",
+        "backup_restore_help": "Carica un backup SQLite di C3PBookmarks. Prima del ripristino viene creata automaticamente una copia di sicurezza.",
+        "backup_file": "File di backup",
+        "backup_restore": "Ripristina backup",
+        "backup_confirm": "Ripristinare questo backup? I dati attuali verranno sostituiti. Prima verrà creata una copia di sicurezza.",
+        "backup_invalid": "Il backup non è valido o non appartiene a C3PBookmarks.",
+        "backup_too_large": "Il backup supera la dimensione massima consentita.",
+        "backup_restored": "Backup ripristinato correttamente.",
+        "backup_restore_error": "Non è stato possibile ripristinare il backup.",
+        "backup_trusted_network": "Usa questa pagina solo su una rete affidabile. L'autenticazione non è integrata.",
+    },
+    "pt": {
+        "backup": "Cópias",
+        "backup_title": "Cópias de segurança",
+        "backup_help": "Descarregue uma cópia da sua biblioteca ou restaure uma cópia anterior.",
+        "backup_download": "Descarregar cópia",
+        "backup_restore_title": "Restaurar uma cópia",
+        "backup_restore_help": "Carregue uma cópia SQLite do C3PBookmarks. Antes de restaurar é criada automaticamente outra cópia de segurança.",
+        "backup_file": "Ficheiro de cópia",
+        "backup_restore": "Restaurar cópia",
+        "backup_confirm": "Restaurar esta cópia? Os dados atuais serão substituídos. Primeiro será criada uma cópia de segurança.",
+        "backup_invalid": "A cópia não é válida ou não pertence ao C3PBookmarks.",
+        "backup_too_large": "A cópia excede o tamanho máximo permitido.",
+        "backup_restored": "Cópia restaurada com sucesso.",
+        "backup_restore_error": "Não foi possível restaurar a cópia.",
+        "backup_trusted_network": "Use esta página apenas numa rede de confiança. A autenticação não está integrada.",
+    },
+    "de": {
+        "backup": "Backup",
+        "backup_title": "Sicherungen",
+        "backup_help": "Eine Kopie der Bibliothek herunterladen oder eine frühere Sicherung wiederherstellen.",
+        "backup_download": "Backup herunterladen",
+        "backup_restore_title": "Backup wiederherstellen",
+        "backup_restore_help": "Eine SQLite-Sicherung von C3PBookmarks hochladen. Vor dem Wiederherstellen wird automatisch eine Sicherung erstellt.",
+        "backup_file": "Backup-Datei",
+        "backup_restore": "Backup wiederherstellen",
+        "backup_confirm": "Dieses Backup wiederherstellen? Die aktuellen Daten werden ersetzt. Zuerst wird eine Sicherung erstellt.",
+        "backup_invalid": "Das Backup ist ungültig oder gehört nicht zu C3PBookmarks.",
+        "backup_too_large": "Das Backup überschreitet die zulässige Größe.",
+        "backup_restored": "Backup erfolgreich wiederhergestellt.",
+        "backup_restore_error": "Das Backup konnte nicht wiederhergestellt werden.",
+        "backup_trusted_network": "Diese Seite nur in einem vertrauenswürdigen Netzwerk verwenden. Eine Authentifizierung ist nicht integriert.",
+    },
+}
+for _language, _values in BACKUP_TRANSLATIONS.items():
+    TRANSLATIONS[_language].update(_values)
+
 CURRENT_LANGUAGE: ContextVar[str] = ContextVar("c3pbookmarks_language", default="es")
 CURRENT_LOCATION: ContextVar[str] = ContextVar("c3pbookmarks_location", default="/")
 
@@ -225,6 +316,50 @@ def db() -> sqlite3.Connection:
     connection = sqlite3.connect(DB_PATH)
     connection.row_factory = sqlite3.Row
     return connection
+
+
+def copy_database(source_path: Path, destination_path: Path) -> None:
+    destination_path.parent.mkdir(parents=True, exist_ok=True)
+    with sqlite3.connect(source_path) as source, sqlite3.connect(destination_path) as destination:
+        source.backup(destination)
+
+
+def validate_backup(backup_path: Path) -> None:
+    try:
+        with sqlite3.connect(backup_path) as connection:
+            integrity = connection.execute("PRAGMA integrity_check").fetchone()[0]
+            tables = {
+                row[0]
+                for row in connection.execute(
+                    "SELECT name FROM sqlite_master WHERE type IN ('table', 'table')"
+                ).fetchall()
+            }
+    except sqlite3.DatabaseError as exc:
+        raise ValueError("invalid SQLite backup") from exc
+    if integrity != "ok" or not {"bookmarks", "folders"}.issubset(tables):
+        raise ValueError("invalid C3PBookmarks backup")
+
+
+def restore_database(backup_path: Path) -> Path:
+    stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    safety_path = BACKUP_DIR / f"pre-restore-{stamp}.sqlite3"
+    with BACKUP_LOCK:
+        copy_database(DB_PATH, safety_path)
+        try:
+            with sqlite3.connect(backup_path) as source, sqlite3.connect(DB_PATH) as destination:
+                source.backup(destination)
+            init_db()
+        except Exception:
+            copy_database(safety_path, DB_PATH)
+            raise
+    return safety_path
+
+
+def remove_file(path: str) -> None:
+    try:
+        Path(path).unlink(missing_ok=True)
+    except OSError:
+        pass
 
 
 def normalize_url(value: str) -> str:
@@ -539,6 +674,7 @@ def page(title: str, body: str, *, query: str = "", message: str = "") -> HTMLRe
       <a href="/bookmarklet">{esc(t("save_link"))}</a>
       <a href="/import">{esc(t("import_html"))}</a>
       <a href="/add">{esc(t("add"))}</a>
+      <a href="/backup">{esc(t("backup"))}</a>
       {language_selector()}
       <button class="theme-button" id="theme-toggle" type="button" title="{esc(t("theme_change"))}">◐</button>
     </nav>
@@ -1151,6 +1287,75 @@ async def import_bookmarks(bookmark_file: UploadFile = File(...), source: str = 
                 skipped += 1
     message = t("import_finished", added=added, skipped=skipped)
     return RedirectResponse(url=f"/?{urlencode({'message': message})}", status_code=303)
+
+
+@app.get("/backup", response_class=HTMLResponse)
+def backup_page(message: str = "") -> HTMLResponse:
+    body = f'''<section class="form-wrap">
+  <p class="eyebrow">{esc(t("backup"))}</p>
+  <h1>{esc(t("backup_title"))}</h1>
+  <p class="muted">{esc(t("backup_help"))}</p>
+  <div class="card-form backup-card">
+    <div>
+      <h2>{esc(t("backup_download"))}</h2>
+      <p class="muted">{esc(t("backup_help"))}</p>
+      <a class="primary-button" href="/backup/download">{esc(t("backup_download"))}</a>
+    </div>
+  </div>
+  <form class="card-form backup-card" method="post" action="/backup/restore" enctype="multipart/form-data" data-confirm="{esc(t("backup_confirm"))}">
+    <div>
+      <h2>{esc(t("backup_restore_title"))}</h2>
+      <p class="muted">{esc(t("backup_restore_help"))}</p>
+    </div>
+    <label>{esc(t("backup_file"))}<input name="backup_file" type="file" accept=".sqlite3,.db,application/vnd.sqlite3" required></label>
+    <div class="form-actions"><a href="/">{esc(t("cancel"))}</a><button class="primary-button" type="submit">{esc(t("backup_restore"))}</button></div>
+  </form>
+  <p class="field-help backup-warning">{esc(t("backup_trusted_network"))}</p>
+</section>'''
+    return page(t("backup"), body, message=message)
+
+
+@app.get("/backup/download")
+def download_backup() -> FileResponse:
+    descriptor, temporary_path = tempfile.mkstemp(prefix="c3pbookmarks-backup-", suffix=".sqlite3")
+    os.close(descriptor)
+    try:
+        with BACKUP_LOCK:
+            copy_database(DB_PATH, Path(temporary_path))
+    except Exception:
+        remove_file(temporary_path)
+        raise
+    filename = f"c3pbookmarks-backup-{datetime.now().strftime('%Y%m%d-%H%M%S')}.sqlite3"
+    return FileResponse(
+        temporary_path,
+        media_type="application/vnd.sqlite3",
+        filename=filename,
+        background=BackgroundTask(remove_file, temporary_path),
+    )
+
+
+@app.post("/backup/restore", response_class=HTMLResponse)
+async def restore_backup(backup_file: UploadFile = File(...)) -> HTMLResponse:
+    descriptor, temporary_path = tempfile.mkstemp(prefix="c3pbookmarks-restore-", suffix=".sqlite3")
+    total = 0
+    try:
+        with os.fdopen(descriptor, "wb") as destination:
+            while chunk := await backup_file.read(1024 * 1024):
+                total += len(chunk)
+                if total > MAX_BACKUP_BYTES:
+                    remove_file(temporary_path)
+                    return backup_page(t("backup_too_large"))
+                destination.write(chunk)
+        validate_backup(Path(temporary_path))
+        restore_database(Path(temporary_path))
+    except ValueError:
+        remove_file(temporary_path)
+        return backup_page(t("backup_invalid"))
+    except Exception:
+        remove_file(temporary_path)
+        return backup_page(t("backup_restore_error"))
+    remove_file(temporary_path)
+    return RedirectResponse(url=f"/backup?{urlencode({'message': t('backup_restored')})}", status_code=303)
 
 
 @app.get("/manifest.json")

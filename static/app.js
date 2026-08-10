@@ -197,6 +197,12 @@
     });
   });
 
+  document.querySelectorAll("form[data-confirm]").forEach((form) => {
+    form.addEventListener("submit", (event) => {
+      if (!window.confirm(form.dataset.confirm)) event.preventDefault();
+    });
+  });
+
   document.addEventListener("dragstart", (event) => {
     const folderLink = event.target.closest?.(".folder-link[data-folder-path][draggable='true']");
     if (folderLink) {

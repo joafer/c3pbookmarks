@@ -130,6 +130,15 @@ folder structure is preserved.
 - The `data/` directory is excluded from Git and the Docker build context to
   reduce the risk of publishing or packaging personal data.
 
+### Web backup and restore
+
+Open **Backup** in the application to download a SQLite copy of your library.
+To restore a copy, upload a backup from the same application. The file is
+validated before restoring, and an automatic safety copy is created first.
+
+Use this page only on a trusted network because the application does not
+include authentication.
+
 Example backup and restore:
 
 ```bash
