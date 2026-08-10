@@ -154,9 +154,4 @@ This project is released under the MIT license. See [LICENSE](LICENSE).
 
 ## Contributing
 
-Suggestions, fixes, and improvements are welcome. Before submitting changes,
-make sure that:
-
-- no personal data, real bookmarks, or secrets are included;
-- the application starts from an empty database;
-- `data/` and local configuration files remain outside version control.
+Suggestions, fixes, and improvements are welcome.
