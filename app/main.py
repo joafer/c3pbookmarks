@@ -674,7 +674,7 @@ def folder_select_options(connection: sqlite3.Connection, selected: str = "") ->
     for path in paths:
         level = path.count(" / ")
         icon = icons.get(path, "").strip()
-        name = t("uncategorized") if path == "Sin clasificar" else path.rsplit(" / ", 1)[-1]
+        name = localized_folder_path(path).rsplit(" / ", 1)[-1]
         label = ("　" * level) + (f"{icon} " if icon else "") + name
         is_selected = " selected" if path == selected else ""
         options.append(f'<option value="{esc(path)}"{is_selected}>{esc(label)}</option>')
@@ -765,11 +765,24 @@ EMOJI_CHOICES = (
     ("📷", "Fotografía"), ("🗺️", "Mapas"), ("🚀", "Proyectos"), ("❤️", "Personal"),
 )
 
+EMOJI_LABELS = {
+    "es": ("Casa", "Trabajo", "Favorito", "Carpeta", "Ordenador", "Web", "Herramientas", "Seguridad", "Documentación", "Finanzas", "Vídeos", "Pruebas", "Archivo", "Notas", "Importante", "Enlace", "Compras", "Banca", "Música", "Juegos", "Fotografía", "Mapas", "Proyectos", "Personal"),
+    "en": ("Home", "Work", "Favorite", "Folder", "Computer", "Web", "Tools", "Security", "Documentation", "Finance", "Videos", "Testing", "Archive", "Notes", "Important", "Link", "Shopping", "Banking", "Music", "Games", "Photography", "Maps", "Projects", "Personal"),
+    "it": ("Casa", "Lavoro", "Preferito", "Cartella", "Computer", "Web", "Strumenti", "Sicurezza", "Documentazione", "Finanza", "Video", "Test", "Archivio", "Note", "Importante", "Link", "Acquisti", "Banca", "Musica", "Giochi", "Fotografia", "Mappe", "Progetti", "Personale"),
+    "pt": ("Casa", "Trabalho", "Favorito", "Pasta", "Computador", "Web", "Ferramentas", "Segurança", "Documentação", "Finanças", "Vídeos", "Testes", "Arquivo", "Notas", "Importante", "Link", "Compras", "Banca", "Música", "Jogos", "Fotografia", "Mapas", "Projetos", "Pessoal"),
+    "de": ("Zuhause", "Arbeit", "Favorit", "Ordner", "Computer", "Web", "Werkzeuge", "Sicherheit", "Dokumentation", "Finanzen", "Videos", "Tests", "Archiv", "Notizen", "Wichtig", "Link", "Einkäufe", "Bank", "Musik", "Spiele", "Fotografie", "Karten", "Projekte", "Persönlich"),
+}
+
+
+def localized_folder_path(value: str) -> str:
+    return " / ".join(t("uncategorized") if part == "Sin clasificar" else part for part in value.split(" / "))
+
 
 def emoji_picker_controls(value: str = "") -> str:
+    labels = EMOJI_LABELS.get(current_language(), EMOJI_LABELS["es"])
     buttons = "".join(
         f'<button type="button" data-emoji="{esc(emoji)}" title="{esc(label)}">{esc(emoji)}</button>'
-        for emoji, label in EMOJI_CHOICES
+        for (emoji, _), label in zip(EMOJI_CHOICES, labels)
     )
     return f'''<input name="icon" value="{esc(first_grapheme(value))}" data-single-grapheme="1" placeholder="🏠">
       <span class="field-help">{esc(t("emoji_help"))}</span>
@@ -845,7 +858,7 @@ def bookmark_card(row: sqlite3.Row, return_folder: str = "", return_q: str = "")
   <label class="bookmark-select-wrap"><input class="bookmark-select" type="checkbox" data-bookmark-select value="{row['id']}" aria-label="{esc(t('select_bookmark'))}"></label>
   <div class="bookmark-main">
     <div class="bookmark-title-row">{icon_html}<a class="bookmark-title" href="{esc(row['url'])}" target="_blank" rel="noopener noreferrer">{esc(row['title'])}</a></div>
-    <div class="bookmark-meta"><span>{esc(row['folder'])}</span>{tags}</div>
+    <div class="bookmark-meta"><span>{esc(localized_folder_path(row['folder']))}</span>{tags}</div>
   </div>
   <div class="bookmark-actions">
     <a class="edit-button" href="{esc(edit_href)}" title="{esc(t('edit_bookmark'))}" aria-label="{esc(t('edit_bookmark'))}">✎</a>
@@ -977,7 +990,7 @@ def home(q: str = "", folder: str = "", message: str = "") -> HTMLResponse:
         folder,
     )
     folder_options = "".join(
-        f'<option value="{esc(path)}">{esc(path)}</option>'
+        f'<option value="{esc(path)}">{esc(localized_folder_path(path))}</option>'
         for path in sorted(folder_counts, key=lambda value: (value.casefold() == "sin clasificar", value.casefold()))
     )
     cards = "".join(bookmark_card(row, folder if not q.strip() else "", q if q.strip() else "") for row in rows)
@@ -1011,7 +1024,7 @@ def home(q: str = "", folder: str = "", message: str = "") -> HTMLResponse:
     </div>
   </section>
 </div>"""
-    return page("Inicio", body, query=q, message=message)
+    return page(t("home"), body, query=q, message=message)
 
 
 @app.get("/api/search")
