@@ -1,0 +1,12 @@
+services:
+  c3pbookmarks:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "${C3PBOOKMARKS_HOST_PORT:-8000}:8000"
+    volumes:
+      - ./data:/app/data
+    environment:
+      # Opcional: URL pública de esta instalación, necesaria para el bookmarklet.
+      # Si se omite, se usa automáticamente la URL con la que se abra la página.
+      C3PBOOKMARKS_PUBLIC_URL: ${C3PBOOKMARKS_PUBLIC_URL:-}

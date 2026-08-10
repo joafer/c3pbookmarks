@@ -1,0 +1,20 @@
+# Datos locales: nunca publicar marcadores personales.
+data/*
+!data/.gitkeep
+backups/
+
+# Entorno y ficheros generados.
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Editor y sistema operativo.
+.DS_Store
+.idea/
+.vscode/
