@@ -39,7 +39,7 @@ The application also starts cleanly with an empty library:
 - Import from HTML exported by Chrome, Firefox, and other browsers.
 - Global search powered by SQLite FTS5.
 - Folders and subfolders with renaming, icons, a default folder, and manual ordering.
-- Drag and drop to move and reorder folders and bookmarks.
+- Drag and drop to move and reorder folders and bookmarks; dragging a selected bookmark moves the whole selected group.
 - Select multiple bookmarks to move them to another folder or delete them together.
 - Language selector with English, Spanish, Italian, Portuguese, and German.
 - Bookmarklet for saving links from any page without installing an extension.

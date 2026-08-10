@@ -279,13 +279,18 @@
     }
     const card = event.target.closest?.(".bookmark-card[draggable='true']");
     if (!card) return;
+    const bookmarkId = card.dataset.bookmarkId;
+    const draggedIds = card.querySelector("[data-bookmark-select]")?.checked ? selectedBookmarkIds() : [bookmarkId];
     event.dataTransfer.effectAllowed = "move";
-    event.dataTransfer.setData("application/x-c3p-bookmark", card.dataset.bookmarkId);
-    event.dataTransfer.setData("text/plain", card.dataset.bookmarkId);
-    card.classList.add("dragging");
+    event.dataTransfer.setData("application/x-c3p-bookmarks", draggedIds.join(","));
+    event.dataTransfer.setData("application/x-c3p-bookmark", bookmarkId);
+    event.dataTransfer.setData("text/plain", draggedIds.join(","));
+    document.querySelectorAll(".bookmark-card").forEach((candidate) => {
+      if (draggedIds.includes(candidate.dataset.bookmarkId)) candidate.classList.add("dragging");
+    });
   });
   document.addEventListener("dragend", (event) => {
-    event.target.closest?.(".bookmark-card")?.classList.remove("dragging");
+    document.querySelectorAll(".bookmark-card.dragging").forEach((card) => card.classList.remove("dragging"));
     event.target.closest?.(".folder-link")?.classList.remove("dragging");
     document.querySelectorAll(".drag-over").forEach((link) => link.classList.remove("drag-over"));
   });
@@ -350,8 +355,31 @@
       }
       return;
     }
-    const bookmarkId = draggedBookmark || event.dataTransfer.getData("text/plain");
-    if (!bookmarkId || !/^\d+$/.test(bookmarkId)) return;
+    const draggedBookmarksValue = event.dataTransfer.getData("application/x-c3p-bookmarks");
+    const draggedBookmarkIds = (draggedBookmarksValue || draggedBookmark || event.dataTransfer.getData("text/plain"))
+      .split(",")
+      .map((value) => value.trim())
+      .filter((value, index, values) => /^\d+$/.test(value) && values.indexOf(value) === index);
+    if (!draggedBookmarkIds.length) return;
+    if (draggedBookmarkIds.length > 1 && (folderLink || targetCard)) {
+      const destination = folderLink?.dataset.folderPath || targetCard?.dataset.bookmarkFolder || "";
+      if (!destination) return;
+      const form = new FormData();
+      draggedBookmarkIds.forEach((id) => form.append("bookmark_ids", id));
+      form.set("folder", destination);
+      try {
+        const response = await fetch("/bookmarks/bulk/move", { method: "POST", body: form });
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.error || tr("move_bookmark_error"));
+        }
+        window.location.reload();
+      } catch (error) {
+        window.alert(error.message || tr("move_bookmark_error"));
+      }
+      return;
+    }
+    const bookmarkId = draggedBookmarkIds[0];
     if (targetCard && targetCard.dataset.bookmarkId !== bookmarkId) {
       const form = new FormData();
       form.set("bookmark_id", bookmarkId);
