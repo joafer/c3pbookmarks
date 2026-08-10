@@ -440,14 +440,21 @@
   document.querySelectorAll("[data-emoji-picker]").forEach((picker) => {
     const input = picker.closest("label")?.querySelector('input[name="icon"]');
     if (!input) return;
+    const firstGrapheme = (value) => {
+      if (typeof Intl !== "undefined" && Intl.Segmenter) {
+        const segments = new Intl.Segmenter(undefined, { granularity: "grapheme" }).segment(value);
+        return segments[Symbol.iterator]().next().value?.segment || "";
+      }
+      return Array.from(value).slice(0, 1).join("");
+    };
     picker.querySelectorAll("[data-emoji]").forEach((button) => {
       button.addEventListener("click", () => {
-        input.value = Array.from(button.dataset.emoji || "").slice(0, 1).join("");
+        input.value = firstGrapheme(button.dataset.emoji || "");
         input.focus();
       });
     });
     input.addEventListener("input", () => {
-      const first = Array.from(input.value).slice(0, 1).join("");
+      const first = firstGrapheme(input.value);
       if (input.value !== first) input.value = first;
     });
   });

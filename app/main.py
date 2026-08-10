@@ -6,6 +6,7 @@ import re
 import sqlite3
 import tempfile
 import threading
+import unicodedata
 import zipfile
 from contextvars import ContextVar
 from datetime import datetime, timezone
@@ -700,7 +701,7 @@ def add_bookmark(connection: sqlite3.Connection, item: dict[str, str]) -> bool:
                 item.get("title", "").strip() or item["url"].strip(),
                 folder or "Sin clasificar",
                 position,
-                item.get("icon", "").strip()[:1],
+                first_grapheme(item.get("icon", "")),
                 item.get("tags", "").strip(),
                 item.get("notes", "").strip(),
                 item.get("source", "").strip(),
@@ -722,6 +723,39 @@ def esc(value: object) -> str:
     return html.escape(str(value or ""), quote=True)
 
 
+def first_grapheme(value: str) -> str:
+    """Return one visible character, preserving emoji variation and joins."""
+    text = str(value or "").strip()
+    if not text:
+        return ""
+
+    result = [text[0]]
+    first_codepoint = ord(text[0])
+    index = 1
+    while index < len(text):
+        character = text[index]
+        codepoint = ord(character)
+        previous = result[-1]
+        is_extension = (
+            character == "\u200d"
+            or previous == "\u200d"
+            or 0xFE00 <= codepoint <= 0xFE0F
+            or 0xE0100 <= codepoint <= 0xE01EF
+            or 0x1F3FB <= codepoint <= 0x1F3FF
+            or unicodedata.category(character) in {"Mn", "Mc", "Me"}
+            or (
+                0x1F1E6 <= first_codepoint <= 0x1F1FF
+                and len(result) == 1
+                and 0x1F1E6 <= codepoint <= 0x1F1FF
+            )
+        )
+        if not is_extension:
+            break
+        result.append(character)
+        index += 1
+    return "".join(result)
+
+
 EMOJI_CHOICES = (
     ("🏠", "Casa"), ("💼", "Trabajo"), ("⭐", "Favorito"), ("📁", "Carpeta"),
     ("🖥️", "Ordenador"), ("🌐", "Web"), ("🔧", "Herramientas"), ("🔒", "Seguridad"),
@@ -737,7 +771,7 @@ def emoji_picker_controls(value: str = "") -> str:
         f'<button type="button" data-emoji="{esc(emoji)}" title="{esc(label)}">{esc(emoji)}</button>'
         for emoji, label in EMOJI_CHOICES
     )
-    return f'''<input name="icon" value="{esc(value)}" maxlength="1" placeholder="🏠">
+    return f'''<input name="icon" value="{esc(first_grapheme(value))}" data-single-grapheme="1" placeholder="🏠">
       <span class="field-help">{esc(t("emoji_help"))}</span>
       <span class="emoji-picker" data-emoji-picker aria-label="{esc(t("choose_emoji"))}">{buttons}<button type="button" data-emoji="" title="{esc(t("remove_icon"))}" aria-label="{esc(t("remove_icon"))}">×</button></span>'''
 
@@ -1144,7 +1178,7 @@ def edit_folder_form(path: str = "") -> HTMLResponse:
 def rename_folder(old_path: str = Form(...), name: str = Form(...), icon: str = Form(""), default_folder: str = Form("")) -> RedirectResponse:
     old_path = normalize_folder(old_path)
     new_name = " ".join(name.split())
-    new_icon = icon.strip()[:1]
+    new_icon = first_grapheme(icon)
     make_default = default_folder in {"1", "true", "on"}
     if not new_name or "/" in new_name:
         return RedirectResponse(url=f"/?{urlencode({'message': t('valid_folder_no_slashes')})}", status_code=303)
@@ -1330,7 +1364,7 @@ def update_bookmark(
             connection.execute(
                 """UPDATE bookmarks SET url=?, normalized_url=?, title=?, folder=?, position=?, icon=?, tags=?, notes=?, updated_at=?
                    WHERE id=?""",
-                (url.strip(), normalized, title.strip() or url.strip(), normalized_folder, position, icon.strip()[:1], tags.strip(), notes.strip(), now(), bookmark_id),
+                (url.strip(), normalized, title.strip() or url.strip(), normalized_folder, position, first_grapheme(icon), tags.strip(), notes.strip(), now(), bookmark_id),
             )
             rebuild_search_index(connection)
         except sqlite3.IntegrityError:
