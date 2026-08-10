@@ -61,6 +61,15 @@ and cannot be deleted.
 
 Requirements: Docker Engine and Docker Compose v2.
 
+Clone the repository and enter its directory:
+
+```bash
+git clone https://github.com/joafer/c3pbookmarks.git
+cd c3pbookmarks
+```
+
+Start the application:
+
 ```bash
 docker compose up -d --build
 ```
