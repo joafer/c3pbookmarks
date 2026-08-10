@@ -726,6 +726,9 @@ EMOJI_CHOICES = (
     ("🏠", "Casa"), ("💼", "Trabajo"), ("⭐", "Favorito"), ("📁", "Carpeta"),
     ("🖥️", "Ordenador"), ("🌐", "Web"), ("🔧", "Herramientas"), ("🔒", "Seguridad"),
     ("📚", "Documentación"), ("💰", "Finanzas"), ("🎬", "Vídeos"), ("🧪", "Pruebas"),
+    ("🗂️", "Archivo"), ("📝", "Notas"), ("📌", "Importante"), ("🔗", "Enlace"),
+    ("🛒", "Compras"), ("🏦", "Banca"), ("🎵", "Música"), ("🎮", "Juegos"),
+    ("📷", "Fotografía"), ("🗺️", "Mapas"), ("🚀", "Proyectos"), ("❤️", "Personal"),
 )
 
 
