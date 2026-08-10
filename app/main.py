@@ -6,6 +6,7 @@ import re
 import sqlite3
 import tempfile
 import threading
+import zipfile
 from contextvars import ContextVar
 from datetime import datetime, timezone
 from html.parser import HTMLParser
@@ -181,10 +182,10 @@ BACKUP_TRANSLATIONS = {
     "es": {
         "backup": "Copias",
         "backup_title": "Copias de seguridad",
-        "backup_help": "Descarga una copia de tu biblioteca o restaura una copia anterior.",
-        "backup_download": "Descargar copia",
+        "backup_help": "Descarga una copia ZIP de tu biblioteca o restaura una copia anterior.",
+        "backup_download": "Descargar copia ZIP",
         "backup_restore_title": "Restaurar una copia",
-        "backup_restore_help": "Sube una copia SQLite de C3PBookmarks. Antes de restaurar se crea automáticamente otra copia de seguridad.",
+        "backup_restore_help": "Sube una copia ZIP de C3PBookmarks. Antes de restaurar se crea automáticamente otra copia de seguridad.",
         "backup_file": "Archivo de copia",
         "backup_restore": "Restaurar copia",
         "backup_confirm": "¿Restaurar esta copia? Los datos actuales se reemplazarán. Antes se creará una copia automática.",
@@ -197,10 +198,10 @@ BACKUP_TRANSLATIONS = {
     "en": {
         "backup": "Backup",
         "backup_title": "Backups",
-        "backup_help": "Download a copy of your library or restore an earlier backup.",
-        "backup_download": "Download backup",
+        "backup_help": "Download a ZIP copy of your library or restore an earlier backup.",
+        "backup_download": "Download ZIP backup",
         "backup_restore_title": "Restore a backup",
-        "backup_restore_help": "Upload a C3PBookmarks SQLite backup. A safety backup is created automatically before restoring.",
+        "backup_restore_help": "Upload a C3PBookmarks ZIP backup. A safety backup is created automatically before restoring.",
         "backup_file": "Backup file",
         "backup_restore": "Restore backup",
         "backup_confirm": "Restore this backup? Current data will be replaced. A safety backup will be created first.",
@@ -213,10 +214,10 @@ BACKUP_TRANSLATIONS = {
     "it": {
         "backup": "Backup",
         "backup_title": "Backup",
-        "backup_help": "Scarica una copia della tua libreria o ripristina un backup precedente.",
-        "backup_download": "Scarica backup",
+        "backup_help": "Scarica una copia ZIP della tua libreria o ripristina un backup precedente.",
+        "backup_download": "Scarica backup ZIP",
         "backup_restore_title": "Ripristina un backup",
-        "backup_restore_help": "Carica un backup SQLite di C3PBookmarks. Prima del ripristino viene creata automaticamente una copia di sicurezza.",
+        "backup_restore_help": "Carica un backup ZIP di C3PBookmarks. Prima del ripristino viene creata automaticamente una copia di sicurezza.",
         "backup_file": "File di backup",
         "backup_restore": "Ripristina backup",
         "backup_confirm": "Ripristinare questo backup? I dati attuali verranno sostituiti. Prima verrà creata una copia di sicurezza.",
@@ -229,10 +230,10 @@ BACKUP_TRANSLATIONS = {
     "pt": {
         "backup": "Cópias",
         "backup_title": "Cópias de segurança",
-        "backup_help": "Descarregue uma cópia da sua biblioteca ou restaure uma cópia anterior.",
-        "backup_download": "Descarregar cópia",
+        "backup_help": "Descarregue uma cópia ZIP da sua biblioteca ou restaure uma cópia anterior.",
+        "backup_download": "Descarregar cópia ZIP",
         "backup_restore_title": "Restaurar uma cópia",
-        "backup_restore_help": "Carregue uma cópia SQLite do C3PBookmarks. Antes de restaurar é criada automaticamente outra cópia de segurança.",
+        "backup_restore_help": "Carregue uma cópia ZIP do C3PBookmarks. Antes de restaurar é criada automaticamente outra cópia de segurança.",
         "backup_file": "Ficheiro de cópia",
         "backup_restore": "Restaurar cópia",
         "backup_confirm": "Restaurar esta cópia? Os dados atuais serão substituídos. Primeiro será criada uma cópia de segurança.",
@@ -245,10 +246,10 @@ BACKUP_TRANSLATIONS = {
     "de": {
         "backup": "Backup",
         "backup_title": "Sicherungen",
-        "backup_help": "Eine Kopie der Bibliothek herunterladen oder eine frühere Sicherung wiederherstellen.",
-        "backup_download": "Backup herunterladen",
+        "backup_help": "Eine ZIP-Kopie der Bibliothek herunterladen oder eine frühere Sicherung wiederherstellen.",
+        "backup_download": "ZIP-Backup herunterladen",
         "backup_restore_title": "Backup wiederherstellen",
-        "backup_restore_help": "Eine SQLite-Sicherung von C3PBookmarks hochladen. Vor dem Wiederherstellen wird automatisch eine Sicherung erstellt.",
+        "backup_restore_help": "Eine ZIP-Sicherung von C3PBookmarks hochladen. Vor dem Wiederherstellen wird automatisch eine Sicherung erstellt.",
         "backup_file": "Backup-Datei",
         "backup_restore": "Backup wiederherstellen",
         "backup_confirm": "Dieses Backup wiederherstellen? Die aktuellen Daten werden ersetzt. Zuerst wird eine Sicherung erstellt.",
@@ -360,6 +361,48 @@ def remove_file(path: str) -> None:
         Path(path).unlink(missing_ok=True)
     except OSError:
         pass
+
+
+def create_zip_backup() -> str:
+    db_descriptor, database_path = tempfile.mkstemp(prefix="c3pbookmarks-backup-", suffix=".sqlite3")
+    os.close(db_descriptor)
+    zip_descriptor, zip_path = tempfile.mkstemp(prefix="c3pbookmarks-backup-", suffix=".zip")
+    os.close(zip_descriptor)
+    try:
+        with BACKUP_LOCK:
+            copy_database(DB_PATH, Path(database_path))
+        with zipfile.ZipFile(zip_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+            archive.write(database_path, arcname="c3pbookmarks.sqlite3")
+    except Exception:
+        remove_file(zip_path)
+        raise
+    finally:
+        remove_file(database_path)
+    return zip_path
+
+
+def extract_backup_database(backup_path: Path) -> tuple[Path, bool]:
+    if not zipfile.is_zipfile(backup_path):
+        return backup_path, False
+    extracted_path: str | None = None
+    try:
+        with zipfile.ZipFile(backup_path) as archive:
+            member = archive.getinfo("c3pbookmarks.sqlite3")
+            if member.is_dir() or member.file_size > MAX_BACKUP_BYTES:
+                raise ValueError("invalid backup archive")
+            descriptor, extracted_path = tempfile.mkstemp(prefix="c3pbookmarks-extracted-", suffix=".sqlite3")
+            total = 0
+            with os.fdopen(descriptor, "wb") as destination, archive.open(member) as source:
+                while chunk := source.read(1024 * 1024):
+                    total += len(chunk)
+                    if total > MAX_BACKUP_BYTES:
+                        raise ValueError("backup archive is too large")
+                    destination.write(chunk)
+    except (KeyError, zipfile.BadZipFile, OSError, ValueError) as exc:
+        if extracted_path:
+            remove_file(extracted_path)
+        raise ValueError("invalid backup archive") from exc
+    return Path(extracted_path), True
 
 
 def normalize_url(value: str) -> str:
@@ -1307,7 +1350,7 @@ def backup_page(message: str = "") -> HTMLResponse:
       <h2>{esc(t("backup_restore_title"))}</h2>
       <p class="muted">{esc(t("backup_restore_help"))}</p>
     </div>
-    <label>{esc(t("backup_file"))}<input name="backup_file" type="file" accept=".sqlite3,.db,application/vnd.sqlite3" required></label>
+    <label>{esc(t("backup_file"))}<input name="backup_file" type="file" accept=".zip,.sqlite3,.db,application/zip,application/vnd.sqlite3" required></label>
     <div class="form-actions"><a href="/">{esc(t("cancel"))}</a><button class="primary-button" type="submit">{esc(t("backup_restore"))}</button></div>
   </form>
   <p class="field-help backup-warning">{esc(t("backup_trusted_network"))}</p>
@@ -1317,27 +1360,25 @@ def backup_page(message: str = "") -> HTMLResponse:
 
 @app.get("/backup/download")
 def download_backup() -> FileResponse:
-    descriptor, temporary_path = tempfile.mkstemp(prefix="c3pbookmarks-backup-", suffix=".sqlite3")
-    os.close(descriptor)
+    temporary_path = create_zip_backup()
     try:
-        with BACKUP_LOCK:
-            copy_database(DB_PATH, Path(temporary_path))
+        filename = f"c3pbookmarks-backup-{datetime.now().strftime('%Y%m%d-%H%M%S')}.zip"
+        return FileResponse(
+            temporary_path,
+            media_type="application/zip",
+            filename=filename,
+            background=BackgroundTask(remove_file, temporary_path),
+        )
     except Exception:
         remove_file(temporary_path)
         raise
-    filename = f"c3pbookmarks-backup-{datetime.now().strftime('%Y%m%d-%H%M%S')}.sqlite3"
-    return FileResponse(
-        temporary_path,
-        media_type="application/vnd.sqlite3",
-        filename=filename,
-        background=BackgroundTask(remove_file, temporary_path),
-    )
 
 
 @app.post("/backup/restore", response_class=HTMLResponse)
 async def restore_backup(backup_file: UploadFile = File(...)) -> HTMLResponse:
     descriptor, temporary_path = tempfile.mkstemp(prefix="c3pbookmarks-restore-", suffix=".sqlite3")
     total = 0
+    extracted_path: Path | None = None
     try:
         with os.fdopen(descriptor, "wb") as destination:
             while chunk := await backup_file.read(1024 * 1024):
@@ -1346,15 +1387,23 @@ async def restore_backup(backup_file: UploadFile = File(...)) -> HTMLResponse:
                     remove_file(temporary_path)
                     return backup_page(t("backup_too_large"))
                 destination.write(chunk)
-        validate_backup(Path(temporary_path))
-        restore_database(Path(temporary_path))
+        restore_path, extracted = extract_backup_database(Path(temporary_path))
+        extracted_path = restore_path if extracted else None
+        validate_backup(restore_path)
+        restore_database(restore_path)
     except ValueError:
         remove_file(temporary_path)
+        if extracted_path:
+            remove_file(str(extracted_path))
         return backup_page(t("backup_invalid"))
     except Exception:
         remove_file(temporary_path)
+        if extracted_path:
+            remove_file(str(extracted_path))
         return backup_page(t("backup_restore_error"))
     remove_file(temporary_path)
+    if extracted_path:
+        remove_file(str(extracted_path))
     return RedirectResponse(url=f"/backup?{urlencode({'message': t('backup_restored')})}", status_code=303)
 
 

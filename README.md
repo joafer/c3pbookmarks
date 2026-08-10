@@ -132,9 +132,10 @@ folder structure is preserved.
 
 ### Web backup and restore
 
-Open **Backup** in the application to download a SQLite copy of your library.
-To restore a copy, upload a backup from the same application. The file is
-validated before restoring, and an automatic safety copy is created first.
+Open **Backup** in the application to download a ZIP archive containing a
+SQLite copy of your library. To restore a copy, upload a backup from the same
+application. The archive is validated before restoring, and an automatic
+safety copy is created first.
 
 Use this page only on a trusted network because the application does not
 include authentication.
