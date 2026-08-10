@@ -263,6 +263,66 @@ BACKUP_TRANSLATIONS = {
 for _language, _values in BACKUP_TRANSLATIONS.items():
     TRANSLATIONS[_language].update(_values)
 
+BULK_TRANSLATIONS = {
+    "es": {
+        "select_all": "Seleccionar todos",
+        "select_bookmark": "Seleccionar marcador",
+        "selected_count": "{count} seleccionados",
+        "move_selected": "Mover seleccionados",
+        "move_to": "Mover a…",
+        "delete_selected": "Borrar seleccionados",
+        "confirm_delete_selected": "¿Borrar los {count} marcadores seleccionados?",
+        "bulk_error": "No se pudieron aplicar las acciones seleccionadas.",
+        "bulk_no_selection": "Selecciona al menos un marcador.",
+    },
+    "en": {
+        "select_all": "Select all",
+        "select_bookmark": "Select bookmark",
+        "selected_count": "{count} selected",
+        "move_selected": "Move selected",
+        "move_to": "Move to…",
+        "delete_selected": "Delete selected",
+        "confirm_delete_selected": "Delete the {count} selected bookmarks?",
+        "bulk_error": "The selected actions could not be applied.",
+        "bulk_no_selection": "Select at least one bookmark.",
+    },
+    "it": {
+        "select_all": "Seleziona tutti",
+        "select_bookmark": "Seleziona segnalibro",
+        "selected_count": "{count} selezionati",
+        "move_selected": "Sposta selezionati",
+        "move_to": "Sposta in…",
+        "delete_selected": "Elimina selezionati",
+        "confirm_delete_selected": "Eliminare i {count} segnalibri selezionati?",
+        "bulk_error": "Non è stato possibile applicare le azioni selezionate.",
+        "bulk_no_selection": "Seleziona almeno un segnalibro.",
+    },
+    "pt": {
+        "select_all": "Selecionar todos",
+        "select_bookmark": "Selecionar marcador",
+        "selected_count": "{count} selecionados",
+        "move_selected": "Mover selecionados",
+        "move_to": "Mover para…",
+        "delete_selected": "Apagar selecionados",
+        "confirm_delete_selected": "Apagar os {count} marcadores selecionados?",
+        "bulk_error": "Não foi possível aplicar as ações selecionadas.",
+        "bulk_no_selection": "Selecione pelo menos um marcador.",
+    },
+    "de": {
+        "select_all": "Alle auswählen",
+        "select_bookmark": "Bookmark auswählen",
+        "selected_count": "{count} ausgewählt",
+        "move_selected": "Ausgewählte verschieben",
+        "move_to": "Verschieben nach…",
+        "delete_selected": "Ausgewählte löschen",
+        "confirm_delete_selected": "Die {count} ausgewählten Bookmarks löschen?",
+        "bulk_error": "Die ausgewählten Aktionen konnten nicht angewendet werden.",
+        "bulk_no_selection": "Mindestens einen Bookmark auswählen.",
+    },
+}
+for _language, _values in BULK_TRANSLATIONS.items():
+    TRANSLATIONS[_language].update(_values)
+
 CURRENT_LANGUAGE: ContextVar[str] = ContextVar("c3pbookmarks_language", default="es")
 CURRENT_LOCATION: ContextVar[str] = ContextVar("c3pbookmarks_location", default="/")
 
@@ -745,6 +805,7 @@ def bookmark_card(row: sqlite3.Row, return_folder: str = "", return_q: str = "")
     )
     icon_html = f'<span class="bookmark-custom-icon" aria-hidden="true">{esc(custom_icon)}</span>' if custom_icon else f'{favicon_html}<span class="bookmark-favicon-fallback" aria-hidden="true">🔗</span>'
     return f"""<article class="bookmark-card" draggable="true" data-bookmark-id="{row['id']}" data-bookmark-folder="{esc(row['folder'])}" title="{esc(t('drag_bookmark'))}">
+  <label class="bookmark-select-wrap"><input class="bookmark-select" type="checkbox" data-bookmark-select value="{row['id']}" aria-label="{esc(t('select_bookmark'))}"></label>
   <div class="bookmark-main">
     <div class="bookmark-title-row">{icon_html}<a class="bookmark-title" href="{esc(row['url'])}" target="_blank" rel="noopener noreferrer">{esc(row['title'])}</a></div>
     <div class="bookmark-meta"><span>{esc(row['folder'])}</span>{tags}</div>
@@ -878,6 +939,10 @@ def home(q: str = "", folder: str = "", message: str = "") -> HTMLResponse:
         [(path, values[0], values[1], folder_icons.get(path, "")) for path, values in folder_counts.items()],
         folder,
     )
+    folder_options = "".join(
+        f'<option value="{esc(path)}">{esc(path)}</option>'
+        for path in sorted(folder_counts, key=lambda value: (value.casefold() == "sin clasificar", value.casefold()))
+    )
     cards = "".join(bookmark_card(row, folder if not q.strip() else "", q if q.strip() else "") for row in rows)
     empty = f'<div class="empty"><strong>{esc(t("empty_title"))}</strong><br>{esc(t("empty_help"))}</div>' if not rows else ""
     body = f"""<section class="hero">
@@ -898,6 +963,13 @@ def home(q: str = "", folder: str = "", message: str = "") -> HTMLResponse:
   <section class="content-column">
     <div class="results-panel">
       <div class="list-heading"><span id="result-count">{esc(count_label("result", len(rows)))}</span><a href="/import">{esc(t("import_bookmarks_html"))}</a></div>
+      <div class="bulk-toolbar" data-bulk-toolbar hidden>
+        <label class="bulk-select-all"><input type="checkbox" data-select-all> {esc(t("select_all"))}</label>
+        <span class="bulk-selection-count" data-selection-count>0</span>
+        <select class="bulk-folder-select" data-bulk-folder aria-label="{esc(t("move_selected"))}"><option value="">{esc(t("move_to"))}</option>{folder_options}</select>
+        <button class="secondary-button" type="button" data-bulk-move disabled>{esc(t("move_selected"))}</button>
+        <button class="bulk-delete-button" type="button" data-bulk-delete disabled>{esc(t("delete_selected"))}</button>
+      </div>
       <section class="bookmark-list" id="bookmark-list">{cards}{empty}</section>
     </div>
   </section>
@@ -928,12 +1000,50 @@ def api_search(q: str = "", folder: str = "") -> JSONResponse:
     )
 
 
+@app.post("/bookmarks/bulk/delete")
+def delete_bookmarks(bookmark_ids: list[int] = Form(...)) -> JSONResponse:
+    ids = list(dict.fromkeys(bookmark_ids))
+    if not ids:
+        return JSONResponse({"ok": False, "error": t("bulk_no_selection")}, status_code=400)
+    placeholders = ",".join("?" for _ in ids)
+    with db() as connection:
+        cursor = connection.execute(f"DELETE FROM bookmarks WHERE id IN ({placeholders})", ids)
+        rebuild_search_index(connection)
+    return JSONResponse({"ok": True, "count": cursor.rowcount})
+
+
 @app.post("/bookmarks/{bookmark_id}/delete")
 def delete_bookmark(bookmark_id: int) -> RedirectResponse:
     with db() as connection:
         connection.execute("DELETE FROM bookmarks WHERE id=?", (bookmark_id,))
         rebuild_search_index(connection)
     return RedirectResponse(url="/", status_code=303)
+
+
+@app.post("/bookmarks/bulk/move")
+def move_bookmarks(bookmark_ids: list[int] = Form(...), folder: str = Form(...)) -> JSONResponse:
+    ids = list(dict.fromkeys(bookmark_ids))
+    normalized_folder = normalize_folder(folder, "Sin clasificar")
+    if not ids:
+        return JSONResponse({"ok": False, "error": t("bulk_no_selection")}, status_code=400)
+    placeholders = ",".join("?" for _ in ids)
+    with db() as connection:
+        existing = connection.execute(f"SELECT id FROM bookmarks WHERE id IN ({placeholders})", ids).fetchall()
+        if not existing:
+            return JSONResponse({"ok": False, "error": t("bookmark_not_found")}, status_code=404)
+        ensure_folder_path(connection, normalized_folder)
+        position = connection.execute(
+            "SELECT COALESCE(MAX(position), -1) + 1 FROM bookmarks WHERE folder=?",
+            (normalized_folder,),
+        ).fetchone()[0]
+        for bookmark in existing:
+            connection.execute(
+                "UPDATE bookmarks SET folder=?, position=?, updated_at=? WHERE id=?",
+                (normalized_folder, position, now(), bookmark[0]),
+            )
+            position += 1
+        rebuild_search_index(connection)
+    return JSONResponse({"ok": True, "count": len(existing), "folder": normalized_folder})
 
 
 @app.post("/bookmarks/{bookmark_id}/move")

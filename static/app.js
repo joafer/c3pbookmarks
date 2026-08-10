@@ -4,28 +4,79 @@
   const translations = {
     es: {
       result_one: "{count} resultado", result_many: "{count} resultados", no_results: "No hay resultados.", try_search: "Prueba otra búsqueda o selecciona una carpeta.",
-      drag_bookmark_folder: "Arrastra este marcador a una carpeta", edit_bookmark: "Editar marcador", delete_bookmark: "Borrar marcador", confirm_bookmark: "¿Borrar este marcador?", confirm_folder: "¿Borrar esta carpeta y mover sus marcadores a Sin clasificar?", uncategorized_last: "Sin clasificar permanece siempre al final.", move_folder_error: "No se pudo mover la carpeta.", reorder_bookmark_error: "No se pudo reordenar el marcador.", move_bookmark_error: "No se pudo mover el marcador."
+      drag_bookmark_folder: "Arrastra este marcador a una carpeta", edit_bookmark: "Editar marcador", delete_bookmark: "Borrar marcador", confirm_bookmark: "¿Borrar este marcador?", confirm_folder: "¿Borrar esta carpeta y mover sus marcadores a Sin clasificar?", uncategorized_last: "Sin clasificar permanece siempre al final.", move_folder_error: "No se pudo mover la carpeta.", reorder_bookmark_error: "No se pudo reordenar el marcador.", move_bookmark_error: "No se pudo mover el marcador.", select_all: "Seleccionar todos", select_bookmark: "Seleccionar marcador", selected_count: "{count} seleccionados", move_selected: "Mover seleccionados", move_to: "Mover a…", delete_selected: "Borrar seleccionados", confirm_delete_selected: "¿Borrar los {count} marcadores seleccionados?", bulk_error: "No se pudieron aplicar las acciones seleccionadas."
     },
     en: {
       result_one: "{count} result", result_many: "{count} results", no_results: "No results.", try_search: "Try another search or select a folder.",
-      drag_bookmark_folder: "Drag this bookmark to a folder", edit_bookmark: "Edit bookmark", delete_bookmark: "Delete bookmark", confirm_bookmark: "Delete this bookmark?", confirm_folder: "Delete this folder and move its bookmarks to Uncategorized?", uncategorized_last: "Uncategorized always stays at the end.", move_folder_error: "The folder could not be moved.", reorder_bookmark_error: "The bookmark could not be reordered.", move_bookmark_error: "The bookmark could not be moved."
+      drag_bookmark_folder: "Drag this bookmark to a folder", edit_bookmark: "Edit bookmark", delete_bookmark: "Delete bookmark", confirm_bookmark: "Delete this bookmark?", confirm_folder: "Delete this folder and move its bookmarks to Uncategorized?", uncategorized_last: "Uncategorized always stays at the end.", move_folder_error: "The folder could not be moved.", reorder_bookmark_error: "The bookmark could not be reordered.", move_bookmark_error: "The bookmark could not be moved.", select_all: "Select all", select_bookmark: "Select bookmark", selected_count: "{count} selected", move_selected: "Move selected", move_to: "Move to…", delete_selected: "Delete selected", confirm_delete_selected: "Delete the {count} selected bookmarks?", bulk_error: "The selected actions could not be applied."
     },
     it: {
       result_one: "{count} risultato", result_many: "{count} risultati", no_results: "Nessun risultato.", try_search: "Prova un'altra ricerca o seleziona una cartella.",
-      drag_bookmark_folder: "Trascina questo segnalibro su una cartella", edit_bookmark: "Modifica segnalibro", delete_bookmark: "Elimina segnalibro", confirm_bookmark: "Eliminare questo segnalibro?", confirm_folder: "Eliminare questa cartella e spostare i suoi segnalibri in Senza categoria?", uncategorized_last: "Senza categoria resta sempre alla fine.", move_folder_error: "Non è stato possibile spostare la cartella.", reorder_bookmark_error: "Non è stato possibile riordinare il segnalibro.", move_bookmark_error: "Non è stato possibile spostare il segnalibro."
+      drag_bookmark_folder: "Trascina questo segnalibro su una cartella", edit_bookmark: "Modifica segnalibro", delete_bookmark: "Elimina segnalibro", confirm_bookmark: "Eliminare questo segnalibro?", confirm_folder: "Eliminare questa cartella e spostare i suoi segnalibri in Senza categoria?", uncategorized_last: "Senza categoria resta sempre alla fine.", move_folder_error: "Non è stato possibile spostare la cartella.", reorder_bookmark_error: "Non è stato possibile riordinare il segnalibro.", move_bookmark_error: "Non è stato possibile spostare il segnalibro.", select_all: "Seleziona tutti", select_bookmark: "Seleziona segnalibro", selected_count: "{count} selezionati", move_selected: "Sposta selezionati", move_to: "Sposta in…", delete_selected: "Elimina selezionati", confirm_delete_selected: "Eliminare i {count} segnalibri selezionati?", bulk_error: "Non è stato possibile applicare le azioni selezionate."
     },
     pt: {
       result_one: "{count} resultado", result_many: "{count} resultados", no_results: "Não existem resultados.", try_search: "Tente outra pesquisa ou selecione uma pasta.",
-      drag_bookmark_folder: "Arraste este marcador para uma pasta", edit_bookmark: "Editar marcador", delete_bookmark: "Apagar marcador", confirm_bookmark: "Apagar este marcador?", confirm_folder: "Apagar esta pasta e mover os seus marcadores para Sem categoria?", uncategorized_last: "Sem categoria fica sempre no fim.", move_folder_error: "Não foi possível mover a pasta.", reorder_bookmark_error: "Não foi possível reordenar o marcador.", move_bookmark_error: "Não foi possível mover o marcador."
+      drag_bookmark_folder: "Arraste este marcador para uma pasta", edit_bookmark: "Editar marcador", delete_bookmark: "Apagar marcador", confirm_bookmark: "Apagar este marcador?", confirm_folder: "Apagar esta pasta e mover os seus marcadores para Sem categoria?", uncategorized_last: "Sem categoria fica sempre no fim.", move_folder_error: "Não foi possível mover a pasta.", reorder_bookmark_error: "Não foi possível reordenar o marcador.", move_bookmark_error: "Não foi possível mover o marcador.", select_all: "Selecionar todos", select_bookmark: "Selecionar marcador", selected_count: "{count} selecionados", move_selected: "Mover selecionados", move_to: "Mover para…", delete_selected: "Apagar selecionados", confirm_delete_selected: "Apagar os {count} marcadores selecionados?", bulk_error: "Não foi possível aplicar as ações selecionadas."
     },
     de: {
       result_one: "{count} Ergebnis", result_many: "{count} Ergebnisse", no_results: "Keine Ergebnisse.", try_search: "Eine andere Suche versuchen oder einen Ordner auswählen.",
-      drag_bookmark_folder: "Diesen Bookmark auf einen Ordner ziehen", edit_bookmark: "Bookmark bearbeiten", delete_bookmark: "Bookmark löschen", confirm_bookmark: "Diesen Bookmark löschen?", confirm_folder: "Diesen Ordner löschen und seine Bookmarks nach Nicht kategorisiert verschieben?", uncategorized_last: "Nicht kategorisiert bleibt immer am Ende.", move_folder_error: "Der Ordner konnte nicht verschoben werden.", reorder_bookmark_error: "Der Bookmark konnte nicht sortiert werden.", move_bookmark_error: "Der Bookmark konnte nicht verschoben werden."
+      drag_bookmark_folder: "Diesen Bookmark auf einen Ordner ziehen", edit_bookmark: "Bookmark bearbeiten", delete_bookmark: "Bookmark löschen", confirm_bookmark: "Diesen Bookmark löschen?", confirm_folder: "Diesen Ordner löschen und seine Bookmarks nach Nicht kategorisiert verschieben?", uncategorized_last: "Nicht kategorisiert bleibt immer am Ende.", move_folder_error: "Der Ordner konnte nicht verschoben werden.", reorder_bookmark_error: "Der Bookmark konnte nicht sortiert werden.", move_bookmark_error: "Der Bookmark konnte nicht verschoben werden.", select_all: "Alle auswählen", select_bookmark: "Bookmark auswählen", selected_count: "{count} ausgewählt", move_selected: "Ausgewählte verschieben", move_to: "Verschieben nach…", delete_selected: "Ausgewählte löschen", confirm_delete_selected: "Die {count} ausgewählten Bookmarks löschen?", bulk_error: "Die ausgewählten Aktionen konnten nicht angewendet werden."
     }
   };
   const ui = translations[language] || translations.es;
   const tr = (key, values = {}) => Object.entries(values).reduce((text, [name, value]) => text.replace(`{${name}}`, value), ui[key] || key);
   const countLabel = (count) => tr(count === 1 ? "result_one" : "result_many", { count });
+  const bulkToolbar = document.querySelector("[data-bulk-toolbar]");
+  const selectedBookmarkIds = () => [...document.querySelectorAll("[data-bookmark-select]:checked")].map((input) => input.value);
+  const updateBulkToolbar = () => {
+    if (!bulkToolbar) return;
+    const checkboxes = [...document.querySelectorAll("[data-bookmark-select]")];
+    const selected = checkboxes.filter((input) => input.checked);
+    const selectAll = bulkToolbar.querySelector("[data-select-all]");
+    const count = selected.length;
+    bulkToolbar.hidden = checkboxes.length === 0;
+    bulkToolbar.querySelector("[data-selection-count]").textContent = tr("selected_count", { count });
+    bulkToolbar.querySelector("[data-bulk-move]").disabled = count === 0;
+    bulkToolbar.querySelector("[data-bulk-delete]").disabled = count === 0;
+    if (selectAll) {
+      selectAll.checked = checkboxes.length > 0 && count === checkboxes.length;
+      selectAll.indeterminate = count > 0 && count < checkboxes.length;
+    }
+  };
+  const bulkAction = async (action) => {
+    const ids = selectedBookmarkIds();
+    if (!ids.length) return;
+    if (action === "delete" && !window.confirm(tr("confirm_delete_selected", { count: ids.length }))) return;
+    const form = new FormData();
+    ids.forEach((id) => form.append("bookmark_ids", id));
+    if (action === "move") {
+      const folder = bulkToolbar.querySelector("[data-bulk-folder]").value;
+      if (!folder) return;
+      form.set("folder", folder);
+    }
+    const endpoint = action === "delete" ? "/bookmarks/bulk/delete" : "/bookmarks/bulk/move";
+    try {
+      const response = await fetch(endpoint, { method: "POST", body: form });
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || tr("bulk_error"));
+      }
+      window.location.reload();
+    } catch (error) {
+      window.alert(error.message || tr("bulk_error"));
+    }
+  };
+  if (bulkToolbar) {
+    bulkToolbar.querySelector("[data-select-all]").addEventListener("change", (event) => {
+      document.querySelectorAll("[data-bookmark-select]").forEach((input) => { input.checked = event.target.checked; });
+      updateBulkToolbar();
+    });
+    bulkToolbar.querySelector("[data-bulk-move]").addEventListener("click", () => bulkAction("move"));
+    bulkToolbar.querySelector("[data-bulk-delete]").addEventListener("click", () => bulkAction("delete"));
+  }
+  document.addEventListener("change", (event) => {
+    if (event.target.matches?.("[data-bookmark-select]")) updateBulkToolbar();
+  });
 
   const saved = localStorage.getItem("c3pbookmarks-theme");
   if (saved) root.dataset.theme = saved;
@@ -64,6 +115,7 @@
         empty.className = "empty";
         empty.innerHTML = `<strong>${tr("no_results")}</strong><br>${tr("try_search")}`;
         resultsList.appendChild(empty);
+        updateBulkToolbar();
         return;
       }
       for (const item of data.results) {
@@ -73,6 +125,16 @@
         card.dataset.bookmarkId = item.id;
         card.dataset.bookmarkFolder = item.folder;
         card.title = tr("drag_bookmark_folder");
+        const selectWrap = document.createElement("label");
+        selectWrap.className = "bookmark-select-wrap";
+        const select = document.createElement("input");
+        select.className = "bookmark-select";
+        select.type = "checkbox";
+        select.dataset.bookmarkSelect = "";
+        select.value = item.id;
+        select.setAttribute("aria-label", tr("select_bookmark"));
+        selectWrap.appendChild(select);
+        card.appendChild(selectWrap);
         const main = document.createElement("div");
         main.className = "bookmark-main";
         const titleRow = document.createElement("div");
@@ -156,6 +218,7 @@
         card.appendChild(actions);
         resultsList.appendChild(card);
       }
+      updateBulkToolbar();
     };
 
     const performSearch = async () => {
@@ -184,6 +247,8 @@
       timer = window.setTimeout(performSearch, 250);
     });
   }
+
+  updateBulkToolbar();
 
   document.querySelectorAll(".delete-form").forEach((form) => {
     form.addEventListener("submit", (event) => {
