@@ -700,7 +700,7 @@ def add_bookmark(connection: sqlite3.Connection, item: dict[str, str]) -> bool:
                 item.get("title", "").strip() or item["url"].strip(),
                 folder or "Sin clasificar",
                 position,
-                item.get("icon", "").strip()[:8],
+                item.get("icon", "").strip()[:1],
                 item.get("tags", "").strip(),
                 item.get("notes", "").strip(),
                 item.get("source", "").strip(),
@@ -737,7 +737,7 @@ def emoji_picker_controls(value: str = "") -> str:
         f'<button type="button" data-emoji="{esc(emoji)}" title="{esc(label)}">{esc(emoji)}</button>'
         for emoji, label in EMOJI_CHOICES
     )
-    return f'''<input name="icon" value="{esc(value)}" maxlength="8" placeholder="🏠  💼  ⭐">
+    return f'''<input name="icon" value="{esc(value)}" maxlength="1" placeholder="🏠">
       <span class="field-help">{esc(t("emoji_help"))}</span>
       <span class="emoji-picker" data-emoji-picker aria-label="{esc(t("choose_emoji"))}">{buttons}<button type="button" data-emoji="" title="{esc(t("remove_icon"))}" aria-label="{esc(t("remove_icon"))}">×</button></span>'''
 
@@ -1144,7 +1144,7 @@ def edit_folder_form(path: str = "") -> HTMLResponse:
 def rename_folder(old_path: str = Form(...), name: str = Form(...), icon: str = Form(""), default_folder: str = Form("")) -> RedirectResponse:
     old_path = normalize_folder(old_path)
     new_name = " ".join(name.split())
-    new_icon = icon.strip()[:8]
+    new_icon = icon.strip()[:1]
     make_default = default_folder in {"1", "true", "on"}
     if not new_name or "/" in new_name:
         return RedirectResponse(url=f"/?{urlencode({'message': t('valid_folder_no_slashes')})}", status_code=303)
@@ -1330,7 +1330,7 @@ def update_bookmark(
             connection.execute(
                 """UPDATE bookmarks SET url=?, normalized_url=?, title=?, folder=?, position=?, icon=?, tags=?, notes=?, updated_at=?
                    WHERE id=?""",
-                (url.strip(), normalized, title.strip() or url.strip(), normalized_folder, position, icon.strip()[:8], tags.strip(), notes.strip(), now(), bookmark_id),
+                (url.strip(), normalized, title.strip() or url.strip(), normalized_folder, position, icon.strip()[:1], tags.strip(), notes.strip(), now(), bookmark_id),
             )
             rebuild_search_index(connection)
         except sqlite3.IntegrityError:

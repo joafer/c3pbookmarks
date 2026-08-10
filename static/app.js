@@ -442,9 +442,13 @@
     if (!input) return;
     picker.querySelectorAll("[data-emoji]").forEach((button) => {
       button.addEventListener("click", () => {
-        input.value = button.dataset.emoji || "";
+        input.value = Array.from(button.dataset.emoji || "").slice(0, 1).join("");
         input.focus();
       });
+    });
+    input.addEventListener("input", () => {
+      const first = Array.from(input.value).slice(0, 1).join("");
+      if (input.value !== first) input.value = first;
     });
   });
 
