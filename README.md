@@ -1,3 +1,10 @@
+## Support the project
+
+[![Support on Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-support-orange?logo=buymeacoffee)](https://buymeacoffee.com/joafer)
+
+C3PBookmarks is free. If you find it useful, you can support its maintenance
+through [Buy Me a Coffee](https://buymeacoffee.com/joafer).
+
 # C3PBookmarks
 
 A simple, web-first, self-hosted bookmark manager. Save links, organize them
@@ -146,12 +153,6 @@ valid backup, and start it again.
 
 This project is released under the MIT license. See [LICENSE](LICENSE).
 
-## Support the project
-
-[![Support on Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-support-orange?logo=buymeacoffee)](https://buymeacoffee.com/joafer)
-
-C3PBookmarks is free. If you find it useful, you can support its maintenance
-through [Buy Me a Coffee](https://buymeacoffee.com/joafer).
 
 ## Contributing
 
